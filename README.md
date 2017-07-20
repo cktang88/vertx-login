@@ -4,6 +4,13 @@
 
 ## Dev
 
+Put your db config vars in `conf.json`:
+```
+{
+    "db_connectionString": <url value>
+}
+```
+
 **Build**
 `mvn clean compile`
 

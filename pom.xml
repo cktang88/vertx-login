@@ -27,6 +27,12 @@
             <artifactId>vertx-auth-oauth2</artifactId>
             <version>3.4.2</version>
         </dependency>
+        <!-- Mongo client for Vert.x -->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-mongo-client</artifactId>
+            <version>3.4.2</version>
+        </dependency>
 
         <!-- vertx unit testing -->
         <dependency>
