@@ -9,3 +9,7 @@
 
 **Package into jar**
 `mvn clean package`
+
+OR
+
+(batchfile for Windows): `run`
