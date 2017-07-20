@@ -26,24 +26,6 @@ public class Db {
 
     }
 
-    // find doc
-    /*
-    public Future<String> find(String email, String password){
-        JsonObject query = new JsonObject()
-                .put("email", email)
-                .put("password", password);
-        return this.client.find(COLLECTION, query, docs -> {
-            if(!docs.succeeded()) {
-                return Future.failedFuture(docs.cause());
-            }
-            if(docs.result().size()==0){
-                return Future.failedFuture("No docs found matching.");
-            }
-            // default
-            return Future.succeededFuture(docs.result().get(0).toString());
-        });
-    }
-    */
     // find user by email
     public Future<JsonObject> find(String email) {
         JsonObject query = new JsonObject()
