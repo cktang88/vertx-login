@@ -11,18 +11,34 @@
   <link rel="icon" href="favicon.ico">
   <!-- fonts -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto:300" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/wingcss"/>
   <style>
     body {
       font-size: 14pt;
       font-family: 'Open Sans', Arial, sans-serif;
       padding: 2em;
     }
+    button, div {
+      font-size: 14pt;
+      font-family: 'Open Sans', Arial, sans-serif;
+    }
   </style>
 </head>
 
 <body>
   <h1>Home</h1>
-  <div id="message"></div>
+  <br></br>
+  <div id="message">You are logged in.</div>
+  <br></br>
+  <button onclick="signOut();">Sign out</button>
+  <script>
+    function signOut() {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        console.log('User signed out.');
+      });
+    }
+  </script>
 </body>
 
 </html>

@@ -7,10 +7,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="description">
   <meta name="author" content="author">
+  <meta name="google-signin-client_id" content="621606087771-dvik5hoor1f2pudmsvqlepq5q5oqrqba.apps.googleusercontent.com">
   <title>Login</title>
   <link rel="icon" href="favicon.ico">
   <!-- fonts -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto:300" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/wingcss" />
   <style>
     body {
       font-size: 14pt;
@@ -18,9 +20,14 @@
       padding: 2em;
     }
 
-    button, input {
+    button,
+    input {
       font-size: 14pt;
       font-family: 'Open Sans', Arial, sans-serif;
+    }
+
+    form {
+      width: 25%;
     }
   </style>
 </head>
@@ -30,15 +37,25 @@
   <form id="form" action='/' method='post'>
     <label><b>Email:</b></label>
     <input type="text" placeholder="Enter Email" name="email" required>
-    <br></br>
     <label><b>Password:</b></label>
     <input type="password" placeholder="Enter Password" name="password" required>
-    <br></br>
     <button type="submit">Login</button>
   </form>
+  <span>Login with Google:</span>
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
   <script>
     document.getElementById('form').onsubmit = () => {
       alert("Form submitted.");
+    }
+
+    function onSignIn(googleUser) {
+      var profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      console.log('Name: ' + profile.getName());
+      console.log('Image URL: ' + profile.getImageUrl());
+      console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
     }
   </script>
 </body>
