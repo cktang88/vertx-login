@@ -1,12 +1,13 @@
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
 import io.vertx.ext.auth.oauth2.OAuth2ClientOptions;
-import io.vertx.ext.auth.oauth2.OAuth2FlowType;
+import io.vertx.ext.auth.oauth2.providers.GoogleAuth;
 
 public class OAuth {
 
-    public static String verify(String idTokenString) {
+    public static String verify(String idTokenString, Vertx vertx) {
 
         OAuth2ClientOptions credentials = new OAuth2ClientOptions()
                 .setClientID("<client-id>")
@@ -15,7 +16,10 @@ public class OAuth {
 
 
         // Initialize the OAuth2 Library
-        OAuth2Auth oauth2 = OAuth2Auth.create(vertx, OAuth2FlowType.AUTH_CODE, credentials);
+        /*http://vertx.io/docs/apidocs/io/vertx/ext/auth/oauth2/providers/GoogleAuth.html*/
+        String clientId = "";
+        String clientSecret = "";
+        OAuth2Auth oauth2 = GoogleAuth.create(vertx, clientId, clientSecret);
 
         // Authorization oauth2 URI
         String authorization_uri = oauth2.authorizeURL(new JsonObject()
