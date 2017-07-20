@@ -7,11 +7,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="description">
   <meta name="author" content="author">
-  <meta name="google-signin-client_id" content="621606087771-dvik5hoor1f2pudmsvqlepq5q5oqrqba.apps.googleusercontent.com">
+
+  <!-- change the content to match your client_id -->
+  <meta name="google-signin-client_id" content="360870276869-rf3m6f5ikp9i8a4u58cad2la0gme533a.apps.googleusercontent.com">
+
   <title>Login</title>
   <link rel="icon" href="favicon.ico">
   <!-- fonts -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto:300" rel="stylesheet">
+  <!-- simple css -->
   <link rel="stylesheet" href="https://unpkg.com/wingcss" />
   <style>
     body {
@@ -52,10 +56,23 @@
 
     function onSignIn(googleUser) {
       var profile = googleUser.getBasicProfile();
+      /*
+      Warning: Do not accept plain user IDs, such as those you can get with the GoogleUser.getId()
+       method, on your backend server. A modified client application can send arbitrary user IDs to
+        your server to impersonate users, so you must instead use verifiable ID tokens to securely
+         get the user IDs of signed-in users on the server side.
+      */
       console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+
       console.log('Name: ' + profile.getName());
       console.log('Image URL: ' + profile.getImageUrl());
-      console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+      console.log('Email: ' + profile.getEmail()); // may be null if no email
+
+      // get ID token, safe to send
+      const id_token = googleUser.getAuthResponse().id_token;
+      // send token via POST
+
+
     }
   </script>
 </body>
