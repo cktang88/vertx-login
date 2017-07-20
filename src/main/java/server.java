@@ -7,6 +7,8 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
 public class server extends AbstractVerticle {
@@ -15,26 +17,27 @@ public class server extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> fut) {
-        httpServer = vertx.createHttpServer();
-
+        // setup routes
         Router router = Router.router(vertx);
         router.route("/*").handler(StaticHandler.create());
+        router.route(HttpMethod.POST, "/").handler(BodyHandler.create());
+        router.post("/").handler(this::login);
 
+        // start server
+        System.out.println("Server started.");
+        vertx.createHttpServer().requestHandler(router::accept).listen(8080);
+    }
+    private void login(RoutingContext routingContext){
+        System.out.println("incoming request!");
+        HttpServerRequest request = routingContext.request();
 
+        if(request.method() == HttpMethod.POST){
+            System.out.println(request.getParam("email"));
+            System.out.println(request.getParam("password"));
+            //here i want to do: send to the html page some data
+            //like "hi"
 
-        httpServer.requestHandler(new Handler<HttpServerRequest>() {
-            @Override
-            public void handle(HttpServerRequest request) {
-                System.out.println("incoming request!");
-
-                if(request.method() == HttpMethod.POST){
-                    //here i want to do: send to the html page some data
-                    //like "hi"
-
-                    // authenticate here
-                }
-            }
-        });
-        httpServer.requestHandler(router::accept).listen(8080);
+            // authenticate here
+        }
     }
 }
