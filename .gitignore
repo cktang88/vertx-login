@@ -1,6 +1,7 @@
 #custom
 .idea
 target
+*.class
 
 
 # Windows image file caches
