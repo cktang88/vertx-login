@@ -7,7 +7,9 @@
 Put your db config vars in `conf.json`:
 ```
 {
-    "db_connectionString": <url value>
+    "db_connectionString" : "<db url>",
+    "oauth2_clientSecret" : "<client secret>",
+    "oauth2_clientId": "<client id>"
 }
 ```
 

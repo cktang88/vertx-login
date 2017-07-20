@@ -1,4 +1,5 @@
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.oauth2.AccessToken;
 import io.vertx.ext.auth.oauth2.OAuth2Auth;
@@ -8,17 +9,11 @@ import io.vertx.ext.auth.oauth2.providers.GoogleAuth;
 public class OAuth {
     private OAuth2Auth oauth2;
     private String authorization_uri;
-    public OAuth(Vertx vertx){
-        OAuth2ClientOptions credentials = new OAuth2ClientOptions()
-                .setClientID("<client-id>")
-                .setClientSecret("<client-secret>")
-                .setSite("https://api.oauth.com");
-
-
+    public OAuth(Vertx vertx, JsonObject config){
         // Initialize the OAuth2 Library
-        /*http://vertx.io/docs/apidocs/io/vertx/ext/auth/oauth2/providers/GoogleAuth.html*/
-        String clientId = "";
-        String clientSecret = "";
+        /* http://vertx.io/docs/apidocs/io/vertx/ext/auth/oauth2/providers/GoogleAuth.html */
+        String clientId = config.getString("oauth2_clientId");
+        String clientSecret = config.getString("oauth2_clientSecret");
         this.oauth2 = GoogleAuth.create(vertx, clientId, clientSecret);
 
         // Authorization oauth2 URI
@@ -26,9 +21,11 @@ public class OAuth {
                 .put("redirect_uri", "http://localhost:8080/callback")
                 .put("scope", "<scope>")
                 .put("state", "<state>"));
+
+        System.out.println("OAuth2 initialized.");
     }
 
-    public String verify(String idTokenString, Vertx vertx) {
+    public String verify(String idTokenString, HttpServerResponse response) {
 
         // Redirect example using Vert.x
         response.putHeader("Location", this.authorization_uri)
@@ -57,5 +54,6 @@ public class OAuth {
                 AccessToken token = res.result();
             }
         });
+        return "";
     }
 }
