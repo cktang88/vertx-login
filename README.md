@@ -13,3 +13,7 @@
 OR
 
 (batchfile for Windows): `run`
+
+**Run**
+
+[Run vertx in an ide](https://stackoverflow.com/questions/24277301/run-vertx-in-an-ide)
