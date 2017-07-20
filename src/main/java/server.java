@@ -6,7 +6,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.Json;
+
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -39,14 +39,31 @@ public class server extends AbstractVerticle {
     // handle logins
     private void login(RoutingContext routingContext){
         HttpServerRequest request = routingContext.request();
+        HttpServerResponse response = routingContext.response();
 
-        if(request.method() == HttpMethod.POST){
-            String email = request.getParam("email");
-            String password = request.getParam("password");
-            //here i want to do: send to the html page some data
-            //like "hi"
+        // only handle POST requests
+        if(request.method() != HttpMethod.POST)
+            return;
 
-            // authenticate here
-        }
+        // authentication for email/password
+        String email = request.getParam("email").trim();
+        String password = request.getParam("password").trim();
+        db.find(email).setHandler(res-> {
+            if(res.succeeded()){
+                // email found
+                if(res.result().getString("password").equals(password)){
+                    // login success
+                    response.sendFile("webroot/home.html").end();
+                }
+                else{
+                    // password did not match
+                    response.end("Incorrect password for " + email);
+                }
+            }
+            else{
+                // email not found
+                response.end("No account found for " + email);
+            }
+        });
     }
 }

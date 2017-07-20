@@ -44,16 +44,15 @@ public class Db {
         });
     }
     */
-    // find doc
-    public Future<JsonObject> find(String email, String password) {
+    // find user by email
+    public Future<JsonObject> find(String email) {
         JsonObject query = new JsonObject()
-                .put("email", email)
-                .put("password", password);
+                .put("email", email);
         Future<JsonObject> future = Future.future();
         this.client.find(COLLECTION, query, res -> {
             if (res.succeeded()) {
                 if(res.result().size()==0) {
-                    future.fail("No docs found matching.");
+                    future.fail("No docs found matching email.");
                 }
                 future.complete(res.result().get(0)); //JsonObject
             } else {
