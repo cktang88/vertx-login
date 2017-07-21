@@ -27,6 +27,14 @@
             <artifactId>vertx-auth-oauth2</artifactId>
             <version>3.4.2</version>
         </dependency>
+
+        <!-- verify oauth tokens -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+            <version>1.22.0</version>
+        </dependency>
+
         <!-- Mongo client for Vert.x -->
         <dependency>
             <groupId>io.vertx</groupId>
