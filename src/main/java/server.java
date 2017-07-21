@@ -5,8 +5,13 @@ import io.vertx.core.http.*;
 
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.Session;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CookieHandler;
+import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.ext.web.sstore.LocalSessionStore;
+import io.vertx.ext.web.sstore.SessionStore;
 
 public class server extends AbstractVerticle {
 
@@ -20,9 +25,12 @@ public class server extends AbstractVerticle {
         // initialize Oauth
         auth = new OAuth(this.vertx, config());
 
-        // setup routes
+        // setup routes & middleware
         Router router = Router.router(vertx);
-        router.route("/*").handler(StaticHandler.create());
+        router.route("/*").handler(StaticHandler.create()); // static page handler
+        router.route("/*").handler(CookieHandler.create()); // cookie handler, required for sessions
+        SessionStore sstore = LocalSessionStore.create(vertx);
+        router.route("/*").handler(SessionHandler.create(sstore)); // session handler
 
         router.post("/").handler(BodyHandler.create());
         router.post("/").handler(this::login);
@@ -41,6 +49,7 @@ public class server extends AbstractVerticle {
     private void login(RoutingContext routingContext){
         HttpServerRequest request = routingContext.request();
         HttpServerResponse response = routingContext.response();
+        Session session = routingContext.session();
 
         // only handle POST requests
         if(request == null || request.method() != HttpMethod.POST)
@@ -75,9 +84,9 @@ public class server extends AbstractVerticle {
                         // OAuth requires an "Authorization" on HTTP header
                         // see https://stackoverflow.com/questions/11318038/http-authorization-header-in-html
                         // but if you send Authorization headers, any 3rd party scripts can read it...bad
-                        // work-around: redirect to special url that doesn't include repsonse params
-                        response.putHeader(HttpHeaders.AUTHORIZATION, "<token>")
-                                .sendFile("webroot/home.html").end();
+                        // work-around: redirect to special url that doesn't include response params
+                        session.put("User", res.result()); // add to session
+                        response.sendFile("webroot/home.html").end();
                     } else {
                         // password did not match
                         response.end("Incorrect password for " + email);
@@ -94,8 +103,8 @@ public class server extends AbstractVerticle {
     private void restrictAccess(RoutingContext routingContext){
         HttpServerRequest request = routingContext.request();
         HttpServerResponse response = routingContext.response();
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if(authHeader!=null && authHeader.length()>0){
+        Session session = routingContext.session();
+        if(session.get("User")){
             response.sendFile("webroot/home.html");
         }
         else{
@@ -108,9 +117,15 @@ public class server extends AbstractVerticle {
         HttpServerRequest request = routingContext.request();
         HttpServerResponse response = routingContext.response();
 
+
         // only handle POST requests
         if(request.method() != HttpMethod.POST)
             return;
+
+        // destroy session
+        // NOTE: session destroyed when browser exists anyway
+        routingContext.session().destroy();
+        System.out.println("Session destroyed.");
 
         // redirect to home page
         response.sendFile("webroot/index.html").end();
