@@ -21,14 +21,13 @@ import java.util.Collections;
 /*
 NOTE: NOT doing this: https://developers.google.com/identity/sign-in/web/server-side-flow
 We're doing this: https://developers.google.com/identity/protocols/OAuth2WebServer
+Actually, we're just doing this: https://developers.google.com/identity/sign-in/web/backend-auth
  */
-
-
 
 
 public class OAuth {
     private OAuth2Auth oauth2;
-    private String authorization_uri;
+    // private String authorization_uri;
     private GoogleIdTokenVerifier verifier;
     public OAuth(Vertx vertx, JsonObject config){
         // Initialize the OAuth2 Library
@@ -38,12 +37,13 @@ public class OAuth {
         this.oauth2 = GoogleAuth.create(vertx, clientId, clientSecret);
 
         // Authorization oauth2 URI
+        /*
         this.authorization_uri = oauth2.authorizeURL(new JsonObject()
                 .put("redirect_uri", "webroot/home.html")
                 // scopes here: https://developers.google.com/identity/protocols/googlescopes#oauth2v2
                 .put("scope", "https://www.googleapis.com/auth/plus.login")
                 .put("state", "<state>"));
-
+*/
         // if application has only a single instance of GoogleIdTokenVerifier, use this builder
         verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                 .setAudience(Collections.singletonList(clientId))
@@ -56,7 +56,7 @@ public class OAuth {
 
     // process token string and send HTTP response
     public void process(String idTokenString, HttpServerResponse response) {
-
+/*
         // Redirect example using Vert.x
         response.putHeader("Location", this.authorization_uri)
                 .setStatusCode(302)
@@ -78,13 +78,15 @@ public class OAuth {
                 AccessToken token = res.result();
             }
         });
+*/
+        this.verify(idTokenString, response);
 
         // creating CSRF token???
         // https://developers.google.com/identity/protocols/OpenIDConnect#createxsrftoken
     }
 
     // verify OAuth token is legitimate using Google API
-    private void verify(String idTokenString){
+    private void verify(String idTokenString, HttpServerResponse response){
         /*
         To validate token, check the following:
         1. The ID token is properly signed by Google. Use Google's public keys
@@ -168,11 +170,15 @@ public class OAuth {
                accounts. By including the domain of the G Suite user (for example, mycollege.edu)
              */
             String hostedDomain = payload.getHostedDomain();
-            if(hostedDomain.equals("vanderbilt.edu")){
+            System.out.println(hostedDomain);
+            if(hostedDomain!=null && hostedDomain.equals("vanderbilt.edu")){
                 //okay
+                response.sendFile("webroot/home.html").end();
             }
             else{
                 // respond can't authenticate from non-Vandy people. Use email/password instead.
+                response.end("Email for Google auth must end in 'vanderbilt.edu'."+
+                        "\nUse email/password instead.");
             }
 
         } else {

@@ -36,7 +36,7 @@
     function signOut() {
       // TODO: fix this function
 
-      // email/password
+      // if email/password
       // send POST request to server saying signed out
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/', true);
@@ -46,11 +46,13 @@
       };
       xhr.send('signout=' + true);
 
-      // oauth
-      var auth2 = gapi.auth2.getAuthInstance();
-      auth2.signOut().then(function () {
-        console.log('User signed out.');
-      });
+      // if oauth
+      if(gapi.auth2){
+        var auth2 = gapi.auth2.signOut().then(function () {
+          console.log('User signed out.');
+        });
+        // send post request to server?
+      }
     }
   </script>
 </body>
