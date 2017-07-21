@@ -36,6 +36,7 @@ public class Db {
             if (res.succeeded()) {
                 if(res.result().size()==0) {
                     future.fail("No docs found matching email.");
+                    return;
                 }
                 future.complete(res.result().get(0)); //JsonObject
             } else {
