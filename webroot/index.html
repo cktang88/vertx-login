@@ -57,22 +57,24 @@
     function onSignIn(googleUser) {
       var profile = googleUser.getBasicProfile();
       /*
-      Warning: Do not accept plain user IDs, such as those you can get with the GoogleUser.getId()
-       method, on your backend server. A modified client application can send arbitrary user IDs to
-        your server to impersonate users, so you must instead use verifiable ID tokens to securely
-         get the user IDs of signed-in users on the server side.
+      Warning: Do not accept plain user IDs with GoogleUser.getId() because easy to impersonate users.
+      Use verifiable tokens with GoogleUser.getAuthResponse().id_token instead.
       */
-      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-
+      console.log('ID: ' + profile.getId());// Do not send this plain id to backend
       console.log('Name: ' + profile.getName());
       console.log('Image URL: ' + profile.getImageUrl());
       console.log('Email: ' + profile.getEmail()); // may be null if no email
 
-      // get ID token, safe to send
+      // get verifiable ID token, safe to send to server
       const id_token = googleUser.getAuthResponse().id_token;
       // send token via POST
-
-
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/', true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.onload = function() {
+        console.log('Signed in as: ' + xhr.responseText);
+      };
+      xhr.send('idtoken=' + id_token);
     }
   </script>
 </body>
