@@ -31,8 +31,22 @@
   <div id="message">You are logged in.</div>
   <br></br>
   <button onclick="signOut();">Sign out</button>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
   <script>
     function signOut() {
+      // TODO: fix this function
+
+      // email/password
+      // send POST request to server saying signed out
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/', true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.onload = function() {
+        console.log('Signed out.');
+      };
+      xhr.send('signout=' + true);
+
+      // oauth
       var auth2 = gapi.auth2.getAuthInstance();
       auth2.signOut().then(function () {
         console.log('User signed out.');

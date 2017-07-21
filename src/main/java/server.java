@@ -31,6 +31,9 @@ public class server extends AbstractVerticle {
         router.route(HttpMethod.POST, "/").handler(BodyHandler.create());
         router.post("/").handler(this::login);
 
+        router.route(HttpMethod.POST, "/").handler(BodyHandler.create());
+        router.post("/").handler(this::logout);
+
         // start server
         System.out.println("Server started.");
         vertx.createHttpServer().requestHandler(router::accept).listen(8080);
@@ -65,5 +68,20 @@ public class server extends AbstractVerticle {
                 response.end("No account found for " + email);
             }
         });
+    }
+
+    // logout
+    private void logout(RoutingContext routingContext){
+        HttpServerRequest request = routingContext.request();
+        HttpServerResponse response = routingContext.response();
+
+        // only handle POST requests
+        if(request.method() != HttpMethod.POST)
+            return;
+
+        // redirect to home page
+        response.sendFile("webroot/index.html").end();
+
+        // TODO: handle logout
     }
 }
