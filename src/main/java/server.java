@@ -27,10 +27,12 @@ public class server extends AbstractVerticle {
 
         // setup routes & middleware
         Router router = Router.router(vertx);
-        router.route("/*").handler(StaticHandler.create()); // static page handler
-        router.route("/*").handler(CookieHandler.create()); // cookie handler, required for sessions
+        /*
+        router.route().handler(CookieHandler.create()); // cookie handler, required for sessions
         SessionStore sstore = LocalSessionStore.create(vertx);
-        router.route("/*").handler(SessionHandler.create(sstore)); // session handler
+        router.route().handler(SessionHandler.create(sstore)); // session handler
+        */
+        router.route("/*").handler(StaticHandler.create()); // webroot page handler
 
         router.post("/").handler(BodyHandler.create());
         router.post("/").handler(this::login);
@@ -49,7 +51,7 @@ public class server extends AbstractVerticle {
     private void login(RoutingContext routingContext){
         HttpServerRequest request = routingContext.request();
         HttpServerResponse response = routingContext.response();
-        Session session = routingContext.session();
+        // Session session = routingContext.session();
 
         // only handle POST requests
         if(request == null || request.method() != HttpMethod.POST)
@@ -85,7 +87,7 @@ public class server extends AbstractVerticle {
                         // see https://stackoverflow.com/questions/11318038/http-authorization-header-in-html
                         // but if you send Authorization headers, any 3rd party scripts can read it...bad
                         // work-around: redirect to special url that doesn't include response params
-                        session.put("User", res.result()); // add to session
+                        // session.put("User", res.result()); // add to session
                         response.sendFile("webroot/home.html").end();
                     } else {
                         // password did not match
@@ -103,8 +105,9 @@ public class server extends AbstractVerticle {
     private void restrictAccess(RoutingContext routingContext){
         HttpServerRequest request = routingContext.request();
         HttpServerResponse response = routingContext.response();
-        Session session = routingContext.session();
-        if(session.get("User")){
+        // Session session = routingContext.session();
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if(authHeader!=null && authHeader.length()>0){
             response.sendFile("webroot/home.html");
         }
         else{
@@ -124,8 +127,8 @@ public class server extends AbstractVerticle {
 
         // destroy session
         // NOTE: session destroyed when browser exists anyway
-        routingContext.session().destroy();
-        System.out.println("Session destroyed.");
+        // routingContext.session().destroy();
+        // System.out.println("Session destroyed.");
 
         // redirect to home page
         response.sendFile("webroot/index.html").end();

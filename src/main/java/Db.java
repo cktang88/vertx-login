@@ -7,6 +7,7 @@ import io.vertx.ext.mongo.UpdateOptions;
 import java.util.List;
 
 public class Db {
+    // could have just used MongoAuth
     public static final String COLLECTION = "vlogin";
     private MongoClient client;
     public Db(Vertx vertx, JsonObject config){

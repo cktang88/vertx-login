@@ -36,5 +36,5 @@ Setting a redirect URI in the console is not a way of telling Google where to go
 **Potential improvements**
 
 1. Encrypt password in db, and before sending from client to server.
-2. Sign user out (auto sign out when browser exits) + User sessions << DO THIS
+2. Sign user out (auto sign out when browser exits) + User sessions
 3. Registration page.
