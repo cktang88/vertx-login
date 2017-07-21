@@ -33,17 +33,18 @@ public class server extends AbstractVerticle {
         router.route().handler(SessionHandler.create(sstore)); // session handler
         */
 
+        router.get("/home.html").handler(this::restrictAccess);
+
 
         router.post("/").handler(BodyHandler.create());
         router.post("/").handler(this::login);
 
-        router.get("/home.html").handler(this::restrictAccess);
         router.post("/home.html").handler(BodyHandler.create());
         router.post("/home.html").handler(this::logout);
 
-        // static handler does not call next()
-        router.route("/*").handler(StaticHandler.create()); // webroot page handler
 
+        // static handler does not call next(), so must be last to register
+        router.route("/*").handler(StaticHandler.create()); // webroot page handler
         // start server
         System.out.println("Server started.");
         vertx.createHttpServer().requestHandler(router::accept).listen(8080);
@@ -62,13 +63,14 @@ public class server extends AbstractVerticle {
         String idtoken = request.getParam("idtoken");
         if(idtoken!=null && idtoken.length()>0){
             // Option #1: OAuth verification
-
-            this.auth.process(idtoken, response);
+            System.out.println("OAUTH");
+            this.auth.process(idtoken, routingContext);
 
             // OAuth requires an "Authorization" on HTTP header
             // response.putHeader(HttpHeaders.AUTHORIZATION, "<token>");
         }
         else {
+            System.out.println("EMAIL/PW");
             // Option #2: authentication for email/password via MongoDB
             String email_orig = request.getParam("email");
             String password_orig = request.getParam("password");
@@ -93,10 +95,12 @@ public class server extends AbstractVerticle {
                     } else {
                         // password did not match
                         response.end("Incorrect password for " + email);
+                        routingContext.fail(401);
                     }
                 } else {
                     // email not found
                     response.end("No account found for " + email);
+                    routingContext.fail(401);
                 }
             });
         }
@@ -104,12 +108,21 @@ public class server extends AbstractVerticle {
 
     // restrict access to webpage to only allow authenticated users
     private void restrictAccess(RoutingContext routingContext){
+
+        // System.out.println("RESTRICT");
         HttpServerRequest request = routingContext.request();
         HttpServerResponse response = routingContext.response();
         // Session session = routingContext.session();
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        System.out.println(authHeader);
         if(authHeader!=null && authHeader.length()>0){
-            response.sendFile("webroot/home.html").end();
+            // all good
+            try {
+                response.sendFile("webroot/home.html").end();
+            }
+            catch(IllegalStateException err){
+                System.out.println(err);
+            }
         }
         else{
             response.setStatusCode(401).end("Access denied."); // Unauthorized
@@ -118,6 +131,7 @@ public class server extends AbstractVerticle {
 
     // logout
     private void logout(RoutingContext routingContext){
+        System.out.println("LOGOUT");
         HttpServerRequest request = routingContext.request();
         HttpServerResponse response = routingContext.response();
 

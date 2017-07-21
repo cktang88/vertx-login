@@ -50,7 +50,7 @@
 
   <script src="https://apis.google.com/js/platform.js" async defer></script>
   <script>
-    document.getElementById('form').onsubmit = () => {
+    document.getElementById('form').onsubmit = function(){
       console.log("Form submitted.");
     }
 
@@ -71,11 +71,20 @@
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/', true);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      /*
       xhr.onload = function() {
-        alert(xhr.responseText);
+        // redirect, mirror auth header
+        document.open("text/html", "replace");
+        document.write(xhr.responseText);  // htmlCode is the variable you called newDocument
+        document.close();
+        if(!xhr.getResponseHeader('Location'))
+          return;
+        var xhr2 = new XMLHttpRequest();
+        xhr2.open('GET', xhr.getResponseHeader('Location'), true);
+        xhr2.setRequestHeader('Authorization', xhr.getResponseHeader('Authorization'));
+        xhr2.send(null);
+        
+        //window.location.href = xhr.getResponseHeader('Location');
       };
-      */
       xhr.send('idtoken=' + id_token);
     }
   </script>

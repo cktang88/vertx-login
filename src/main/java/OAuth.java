@@ -16,6 +16,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import io.vertx.ext.web.RoutingContext;
 // exceptions
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -34,7 +35,9 @@ public class OAuth{
     // private OAuth2Auth oauth2;
     // private String authorization_uri;
     private GoogleIdTokenVerifier verifier;
+    Vertx vertx;
     public OAuth(Vertx vertx, JsonObject config){
+        this.vertx = vertx;
         // Initialize the OAuth2 Library
         /* http://vertx.io/docs/apidocs/io/vertx/ext/auth/oauth2/providers/GoogleAuth.html */
         String clientId = config.getString("oauth2_clientId");
@@ -60,7 +63,8 @@ public class OAuth{
     }
 
     // process token string and send HTTP response
-    public void process(String idTokenString, HttpServerResponse response) {
+    public void process(String idTokenString, RoutingContext ctx) {
+        HttpServerResponse response = ctx.response();
 /*
         // Redirect example using Vert.x
         response.putHeader("Location", this.authorization_uri)
@@ -84,20 +88,40 @@ public class OAuth{
             }
         });
 */
-        JsonObject user = this.verify(idTokenString);
-        if(user.getString("error").equals("")){
-            response.putHeader(HttpHeaders.AUTHORIZATION, user.toString())
-                    .sendFile("webroot/home.html").end();
-        }
-        else{
-            response.end(user.getString("error"));
-        }
+        vertx.executeBlocking(future -> {
+            JsonObject user = this.verify(idTokenString);
+            future.complete(user);
+        }, res -> {
+            JsonObject user = (JsonObject)res.result();
+            try{
+                if(user.getString("error").equals("")){
+                    System.out.println("OAUTH SUCCEED");
+                    // System.out.println(ctx.normalisedPath());
+                    /*
+                    response.putHeader(HttpHeaders.AUTHORIZATION, user.toString())
+                            .putHeader(HttpHeaders.LOCATION, "/home.html")
+                            .sendFile("webroot/home.html")
+                            .end();
+                            */
+                    response.putHeader(HttpHeaders.LOCATION, "/home.html")
+                            .end("OAUTH SUCCESS: " + user);
+                }
+                else{
+                    response.end(user.getString("error"));
+                    ctx.fail(401);
+                }
+            }
+            catch(IllegalStateException e){
+                System.out.println(e);
+            }
+        });
 
         // creating CSRF token???
         // https://developers.google.com/identity/protocols/OpenIDConnect#createxsrftoken
     }
 
     // verify OAuth token is legitimate using Google API
+    // might take a long time... blocking???
     private JsonObject verify(String idTokenString){
         /*
         To validate token, check the following:
