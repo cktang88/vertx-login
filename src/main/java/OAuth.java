@@ -86,8 +86,8 @@ public class OAuth{
 */
         JsonObject user = this.verify(idTokenString);
         if(user.getString("error").equals("")){
-            response.putHeader(HttpHeaders.AUTHORIZATION, user.toString());
-            response.sendFile("webroot/home.html");
+            response.putHeader(HttpHeaders.AUTHORIZATION, user.toString())
+                    .sendFile("webroot/home.html").end();
         }
         else{
             response.end(user.getString("error"));
