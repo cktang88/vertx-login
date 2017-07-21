@@ -32,15 +32,17 @@ public class server extends AbstractVerticle {
         SessionStore sstore = LocalSessionStore.create(vertx);
         router.route().handler(SessionHandler.create(sstore)); // session handler
         */
-        router.route("/*").handler(StaticHandler.create()); // webroot page handler
+
 
         router.post("/").handler(BodyHandler.create());
         router.post("/").handler(this::login);
 
-
         router.get("/home.html").handler(this::restrictAccess);
         router.post("/home.html").handler(BodyHandler.create());
         router.post("/home.html").handler(this::logout);
+
+        // static handler does not call next()
+        router.route("/*").handler(StaticHandler.create()); // webroot page handler
 
         // start server
         System.out.println("Server started.");
@@ -62,7 +64,6 @@ public class server extends AbstractVerticle {
             // Option #1: OAuth verification
 
             this.auth.process(idtoken, response);
-            return;
 
             // OAuth requires an "Authorization" on HTTP header
             // response.putHeader(HttpHeaders.AUTHORIZATION, "<token>");
@@ -108,7 +109,7 @@ public class server extends AbstractVerticle {
         // Session session = routingContext.session();
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if(authHeader!=null && authHeader.length()>0){
-            response.sendFile("webroot/home.html");
+            response.sendFile("webroot/home.html").end();
         }
         else{
             response.setStatusCode(401).end("Access denied."); // Unauthorized
