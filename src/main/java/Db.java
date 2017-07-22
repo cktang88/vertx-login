@@ -4,6 +4,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.UpdateOptions;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 public class Db {
@@ -49,12 +55,19 @@ public class Db {
 
     // performs mongo upsert operation
     public Future<JsonObject> upsert(String email, String password){
+
+        // generate salt
+        SecureRandom srand = new SecureRandom();
+        byte[] randomSalt = new byte[64];
+        srand.nextBytes(randomSalt);
+
+        byte[] hashedpw = pwHash(password, randomSalt);
         JsonObject query = new JsonObject()
-                .put("email", email)
-                .put("password", password);
+                .put("email", email); // just find matching emails
         JsonObject update = new JsonObject().put("$set",
                 new JsonObject().put("email", email)
-                .put("password", password));
+                        .put("pwsalt", randomSalt)
+                        .put("hashedpassword", hashedpw));
         Future<JsonObject> future = Future.future();
         UpdateOptions options = new UpdateOptions().setMulti(false).setUpsert(true);
 
@@ -68,5 +81,25 @@ public class Db {
 
         });
         return future;
+    }
+
+    // hash password
+    // returns hashed password
+    public static byte[] pwHash(String pw, byte[] salt){
+        return Db.hashPassword(pw.toCharArray(), salt, 10, 30);
+    }
+    private static byte[] hashPassword(
+            final char[] password, final byte[] salt, final int iterations, final int keyLength)
+    {
+        try {
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+            PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, keyLength);
+            SecretKey key = skf.generateSecret(spec);
+            byte[] res = key.getEncoded();
+            return res;
+
+        } catch(NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

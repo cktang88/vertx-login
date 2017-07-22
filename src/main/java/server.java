@@ -83,8 +83,9 @@ public class server extends AbstractVerticle {
             String password = password_orig.trim();
             db.find(email).setHandler(res -> {
                 if (res.succeeded()) {
+                    byte[] hashedpw = Db.pwHash(password, res.result().getString("pwsalt").getBytes());
                     // email found
-                    if (res.result().getString("password").equals(password)) {
+                    if (res.result().getString("hashedpassword").equals(hashedpw)) {
                         // login success
                         // OAuth requires an "Authorization" on HTTP header
                         // see https://stackoverflow.com/questions/11318038/http-authorization-header-in-html
