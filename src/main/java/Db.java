@@ -1,3 +1,5 @@
+import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 import io.vertx.core.*;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -60,14 +62,15 @@ public class Db {
         SecureRandom srand = new SecureRandom();
         byte[] randomSalt = new byte[64];
         srand.nextBytes(randomSalt);
-
+        String salt = Base64.encode(randomSalt);
         byte[] hashedpw = pwHash(password, randomSalt);
+        String pw = Base64.encode(hashedpw);
         JsonObject query = new JsonObject()
                 .put("email", email); // just find matching emails
         JsonObject update = new JsonObject().put("$set",
                 new JsonObject().put("email", email)
-                        .put("pwsalt", randomSalt)
-                        .put("hashedpassword", hashedpw));
+                        .put("pwsalt", salt)
+                        .put("hashedpassword", pw));
         Future<JsonObject> future = Future.future();
         UpdateOptions options = new UpdateOptions().setMulti(false).setUpsert(true);
 
