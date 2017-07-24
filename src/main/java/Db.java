@@ -27,8 +27,8 @@ public class Db {
         // setup test accounts
         CompositeFuture
         .all(
-            this.upsert("foo@foo.com", "foo"),
-            this.upsert("bar@bar.com", "bar"))
+            this.upsert("foo@foo.com", "foo!"),
+            this.upsert("bar@bar.com", "bar!"))
         .setHandler((res)->{
             System.out.println("Db test accounts created.");
         });
@@ -89,7 +89,7 @@ public class Db {
     // hash password
     // returns hashed password
     public static byte[] pwHash(String pw, byte[] salt){
-        return Db.hashPassword(pw.toCharArray(), salt, 10, 30);
+        return Db.hashPassword(pw.toCharArray(), salt, 100000, 256);
     }
     private static byte[] hashPassword(
             final char[] password, final byte[] salt, final int iterations, final int keyLength)
