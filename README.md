@@ -1,6 +1,5 @@
 # vertx-login
-
-2-path login (@vanderbilt.edu OAuth login, or email/password) on Vert.x backend
+[Vert.x](http://vertx.io/) web server back-end with 2-path login (@vanderbilt.edu OAuth2 token login, or email/password). User data is encrypted securely with PBKDF2, then stored in MongoDB.
 
 ## Dev
 
@@ -23,7 +22,7 @@ Put your db config vars in `conf.json`:
 
 OR
 
-(batchfile for Windows): `run`
+(for Windows): `run.bat`
 
 **Run**
 
@@ -35,6 +34,5 @@ Setting a redirect URI in the console is not a way of telling Google where to go
 
 **Potential improvements**
 
-1. Encrypt password in db, and before sending from client to server.
-2. Sign user out (auto sign out when browser exits) + User sessions
-3. Registration page.
+1. Sign user out (auto sign out when browser exits) + User sessions
+2. Registration page.
